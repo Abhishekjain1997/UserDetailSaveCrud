@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form onsubmit="savetolocal(event)">
+        <label>Name</label>
+        <input type="text" name="username" id="usernameInputTag" required/>
+        <label>Emailid</label>
+        <input type="email" name="emailid"  id="emailInputTag" required/>
+        <label>Phonenumber</label>
+        <input type="tel"  name="phonenumber" id="phonenumberInputTag" required/>
+        <button>Submit</button>
+    </form>
+    <ul id='Listofusers'></ul>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.5/axios.min.js"></script>
+    <script>
+        function savetolocal(event) {
+            event.preventDefault();
+            const name = event.target.username.value;
+            const email = event.target.emailid.value;
+            const phonenumber = event.target.phonenumber.value;
+
+            const obj = {
+                name,
+                email,
+                phonenumber
+            };
+
+            axios.post("https://crudcrud.com/api/8ef8813b725642839ce53e690cecfa2a/appoint", obj)
+                .then((response) => {
+                    showuseronscreen(response.data);
+                    console.log(response);
+                })
+                .catch((err) => {
+                    document.body.innerHTML = document.body.innerHTML + "<h4>Something is wrong</h4>";
+                    console.log(err);
+                });
+        }
+
+        window.onload = () => {
+            axios.get("https://crudcrud.com/api/8ef8813b725642839ce53e690cecfa2a/appoint")
+                .then((response) => {
+                    console.log(response);
+                    for (let i = 0; i < response.data.length; i++) {
+                        showuseronscreen(response.data[i]);
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        }
+
+        function showuseronscreen(obj) {
+            const parentElem = document.getElementById('Listofusers');
+            const childelem = document.createElement('li');
+            childelem.textContent = obj.name + '-' + obj.email + '-' + obj.phonenumber;
+
+            const deletebutton = document.createElement('button');
+            deletebutton.textContent = 'Delete';
+            deletebutton.onclick = () => {
+                // Assuming you have an API endpoint for deletion
+                axios.delete(`https://crudcrud.com/api/8ef8813b725642839ce53e690cecfa2a/appoint/${obj._id}`)
+                    .then(() => {
+                        parentElem.removeChild(childelem);
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    });
+            };
+            childelem.appendChild(deletebutton);
+
+            const editbutton = document.createElement('button');
+            editbutton.textContent = 'Edit';
+            editbutton.onclick = () => {
+                // Assuming you have an API endpoint for deletion
+                axios.delete(`https://crudcrud.com/api/8ef8813b725642839ce53e690cecfa2a/appoint/${obj._id}`)
+                    .then(() => {
+                        // Populate the form fields with existing data
+                        document.getElementById('usernameInputTag').value = obj.name;
+                        document.getElementById('emailInputTag').value = obj.email;
+                        document.getElementById('phonenumberInputTag').value = obj.phonenumber;
+                        
+                        // Remove the current list item
+                        parentElem.removeChild(childelem);
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    });
+            };
+            childelem.appendChild(editbutton);
+
+            parentElem.appendChild(childelem);
+        }
+    </script>
+</body>
+</html>
